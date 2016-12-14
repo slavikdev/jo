@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 by Viacheslav Shynkarenko. All Rights Reserved.
+//
+
 package jo
 
 // Response describes common service response format.
@@ -7,7 +11,9 @@ type Response struct {
 	Error      ResponseError `json:"error"`
 	Data       interface{}   `json:"data"`
 
-	HttpCode   int
+	HTTPCode int
+
+	// EndRequest specifies whether this response should be considered as final.
 	EndRequest bool
 }
 
@@ -23,7 +29,7 @@ func Ok(data interface{}) *Response {
 	response := &Response{}
 	response.Successful = true
 	response.Data = data
-	response.HttpCode = 200
+	response.HTTPCode = 200
 	response.EndRequest = true
 	return response
 }
@@ -34,7 +40,7 @@ func Fail(code int, data interface{}, errorData ResponseError) *Response {
 	response.Successful = false
 	response.Error = errorData
 	response.Data = data
-	response.HttpCode = code
+	response.HTTPCode = code
 	response.EndRequest = true
 	return response
 }

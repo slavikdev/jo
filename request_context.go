@@ -21,5 +21,5 @@ type RequestContext struct {
 	PrevHandlerResponse *Response
 
 	// Logger is a user defined logging interface.
-	Logger *ILogger
+	Logger ILogger
 }

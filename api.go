@@ -14,7 +14,7 @@ import (
 type API struct {
 	globalContext      interface{}
 	routes             []*Route
-	logger             *ILogger
+	logger             ILogger
 	initRequestHandler RouteHandler
 	endRequestHandler  RouteHandler
 }
@@ -47,7 +47,7 @@ func (api *API) SetEndRequestHandler(handler RouteHandler) {
 }
 
 // SetLogger sets user defined logger to be made available for every request handler.
-func (api *API) SetLogger(logger *ILogger) {
+func (api *API) SetLogger(logger ILogger) {
 	api.logger = logger
 }
 

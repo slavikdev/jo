@@ -6,4 +6,5 @@ Basically I've extracted here all the stuff I usually add building APIs. It woul
 everyone but that's exactly the point: to agree on common things and let developers
 focus on specific implementation. If you need more flexibility–go get [gin](https://github.com/gin-gonic/gin).
 
+[![Build Status](https://travis-ci.org/slavikdev/jo.svg)](https://travis-ci.org/slavikdev/jo)
 [![GoDoc](https://godoc.org/github.com/slavikdev/jo?status.svg)](https://godoc.org/github.com/slavikdev/jo)

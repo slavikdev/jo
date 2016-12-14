@@ -7,4 +7,5 @@ everyone but that's exactly the point: to agree on common things and let develop
 focus on specific implementation. If you need more flexibility–go get [gin](https://github.com/gin-gonic/gin).
 
 [![Build Status](https://travis-ci.org/slavikdev/jo.svg)](https://travis-ci.org/slavikdev/jo)
+[![Go Report Card](https://goreportcard.com/badge/github.com/slavikdev/jo)](https://goreportcard.com/report/github.com/slavikdev/jo)
 [![GoDoc](https://godoc.org/github.com/slavikdev/jo?status.svg)](https://godoc.org/github.com/slavikdev/jo)

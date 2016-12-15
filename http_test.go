@@ -57,7 +57,10 @@ func (ht *HTTPTest) callAPI(method string, url string, requestJSON interface{}) 
 func (ht *HTTPTest) createRequest(method string, url string, requestJSON interface{}) *http.Request {
 	jsonBytes := jsonToBytes(requestJSON)
 	byteReader := bytes.NewReader(jsonBytes)
-	request := httptest.NewRequest(method, url, byteReader)
+	request, err := http.NewRequest(method, url, byteReader)
+	if nil != err {
+		log.Fatalf("Couldn't create request: %s %s", method, url)
+	}
 	request.Header.Add("Content-Type", "application/json")
 	return request
 }

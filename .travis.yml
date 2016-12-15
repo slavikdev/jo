@@ -11,3 +11,12 @@ go:
 # - http://docs.travis-ci.com/user/workers/container-based-infrastructure/
 # - http://docs.travis-ci.com/user/workers/standard-infrastructure/
 sudo: false
+
+before_install:
+  - go get -t -v ./...
+
+script:
+  - go test -race -coverprofile=coverage.txt -covermode=atomic
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

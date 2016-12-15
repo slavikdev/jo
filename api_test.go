@@ -61,6 +61,18 @@ func TestSetLogger(t *testing.T) {
 	assert.NotNil(t, api.logger)
 }
 
+func TestMap(t *testing.T) {
+	api := NewAPI()
+	assert.Empty(t, api.routes)
+
+	api.Map("get", "/a", emptyHandler)
+	api.Map("get,post,put", "/b", emptyHandler)
+	api.Map("post, put, delete", "/c", emptyHandler)
+
+	assert.NotEmpty(t, api.routes)
+	assert.Equal(t, 7, len(api.routes), "There must be 7 routes for each HTTP method + path")
+}
+
 func assertOk(t *testing.T, response *Response) {
 	assert.NotNil(t, response)
 	assert.Equal(t, 200, response.HTTPCode)

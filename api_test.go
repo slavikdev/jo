@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Creates API instance and make sure all fields are empty right after creation.
 func TestNewAPI(t *testing.T) {
 	api := NewAPI()
 	assert.Nil(t, api.globalContext)
@@ -23,6 +24,8 @@ type dummyGlobalContext struct {
 	Data string
 }
 
+// Creates API instance, makes sure global context is nil after creation,
+// then adds dummy global contexts and checks whether it was properly stored.
 func TestSetGlobalContext(t *testing.T) {
 	api := NewAPI()
 	assert.Nil(t, api.globalContext)
@@ -33,6 +36,9 @@ func TestSetGlobalContext(t *testing.T) {
 	assert.Equal(t, globalContext.Data, (api.globalContext.(*dummyGlobalContext)).Data)
 }
 
+// Creates API instance, makes sure init request handler is nil,
+// then sets the handler to a function that returns empty Ok response,
+// then calls the function and validates response.
 func TestSetInitRequestHandler(t *testing.T) {
 	api := NewAPI()
 	assert.Nil(t, api.initRequestHandler)
@@ -40,9 +46,12 @@ func TestSetInitRequestHandler(t *testing.T) {
 	api.SetInitRequestHandler(emptyHandler)
 	assert.NotNil(t, api.initRequestHandler)
 	response := api.initRequestHandler(nil)
-	assertOk(t, response)
+	AssertOk(t, response)
 }
 
+// Creates API instance, makes sure end request handler is nil,
+// then sets the handler to a function that returns empty Ok response,
+// then calls the function and validates response.
 func TestSetEndRequestHandler(t *testing.T) {
 	api := NewAPI()
 	assert.Nil(t, api.endRequestHandler)
@@ -50,9 +59,11 @@ func TestSetEndRequestHandler(t *testing.T) {
 	api.SetEndRequestHandler(emptyHandler)
 	assert.NotNil(t, api.endRequestHandler)
 	response := api.endRequestHandler(nil)
-	assertOk(t, response)
+	AssertOk(t, response)
 }
 
+// Creates API instance, makes sure logger is nil,
+// then sets logger and checks whether it was properly stored.
 func TestSetLogger(t *testing.T) {
 	api := NewAPI()
 	assert.Nil(t, api.logger)
@@ -61,6 +72,9 @@ func TestSetLogger(t *testing.T) {
 	assert.NotNil(t, api.logger)
 }
 
+// Create API instance, makes sure routes are empty.
+// Adds 3 mappings with several HTTP methods which eventually maps handlers to 7 endpoints.
+// Checks whether correct amount of routes was added.
 func TestMap(t *testing.T) {
 	api := NewAPI()
 	assert.Empty(t, api.routes)
@@ -73,12 +87,12 @@ func TestMap(t *testing.T) {
 	assert.Equal(t, 7, len(api.routes), "There must be 7 routes for each HTTP method + path")
 }
 
-func assertOk(t *testing.T, response *Response) {
-	assert.NotNil(t, response)
-	assert.Equal(t, 200, response.HTTPCode)
-	assert.True(t, response.Successful)
-}
-
-func emptyHandler(context *RequestContext) *Response {
-	return Ok(nil)
+// Creates API, adds simple route mapping and builds gin engine, creating gin-specific
+// handler for the route mapped.
+// Makes sure the engine isn't nil.
+func TestBuildEngine(t *testing.T) {
+	api := NewAPI()
+	api.Map("get", "/", emptyHandler)
+	engine := api.buildEngine()
+	assert.NotNil(t, engine)
 }

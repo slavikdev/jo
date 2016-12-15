@@ -4,7 +4,7 @@
 
 package jo
 
-import "fmt"
+import "log"
 
 type testLogger struct {
 }
@@ -26,5 +26,5 @@ func (l *testLogger) Error(format string, v ...interface{}) {
 }
 
 func (l *testLogger) log(category string, format string, v ...interface{}) {
-	fmt.Printf("["+category+"]"+format, v)
+	log.Printf("["+category+"] "+format, v)
 }

@@ -112,16 +112,19 @@ func (api *API) mapRoute(route *Route, engine *gin.Engine) {
 // createHandlerWrapper creates gin-specific handler wrapper.
 func (api *API) createHandlerWrapper(handlers []RouteHandler) gin.HandlerFunc {
 	return func(innerContext *gin.Context) {
-		prevResponse, context := api.initRequest(innerContext)
+		response, context := api.initRequest(innerContext)
+		if response.EndRequest {
+			api.endRequest(innerContext, context, response)
+			return
+		}
+
 		for _, handler := range handlers {
-			response := handler(context)
+			response = handler(context)
 			if response.EndRequest {
 				api.endRequest(innerContext, context, response)
 				return
 			}
-
-			prevResponse = response
-			context.PrevHandlerResponse = prevResponse
+			context.PrevHandlerResponse = response
 		}
 	}
 }

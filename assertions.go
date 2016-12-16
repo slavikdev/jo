@@ -23,3 +23,19 @@ func AssertFail(t *testing.T, response *Response) {
 	assert.NotEqual(t, 200, response.HTTPCode)
 	assert.False(t, response.Successful)
 }
+
+// AssertForbidden checks expected properties of Forbidden response.
+func AssertForbidden(t *testing.T, response *Response) {
+	AssertFail(t, response)
+	assert.Equal(t, 403, response.HTTPCode)
+	assert.Equal(t, 403, response.Error.Code)
+	assert.Equal(t, "Forbidden", response.Error.Message)
+}
+
+// AssertBadRequest checks expected properties of BadRequest response.
+func AssertBadRequest(t *testing.T, response *Response) {
+	AssertFail(t, response)
+	assert.Equal(t, 400, response.HTTPCode)
+	assert.Equal(t, 400, response.Error.Code)
+	assert.Equal(t, "Bad Request", response.Error.Message)
+}

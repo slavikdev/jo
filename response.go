@@ -45,6 +45,22 @@ func Fail(code int, data interface{}, errorData ResponseError) *Response {
 	return response
 }
 
+// Forbidden creates 403 Forbidden HTTP response.
+func Forbidden() *Response {
+	errorCode := 403
+	errorData := ResponseError{Code: errorCode, Message: "Forbidden"}
+	response := Fail(errorCode, nil, errorData)
+	return response
+}
+
+// BadRequest creates 400 Bad Request HTTP response.
+func BadRequest() *Response {
+	errorCode := 400
+	errorData := ResponseError{Code: errorCode, Message: "Bad Request"}
+	response := Fail(errorCode, nil, errorData)
+	return response
+}
+
 // Next creates response for the next handler in chain.
 func Next(data interface{}) *Response {
 	response := &Response{}

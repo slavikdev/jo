@@ -43,7 +43,8 @@ func TestSetInitRequestHandler(t *testing.T) {
 	api := NewAPI()
 	assert.Nil(t, api.initRequestHandler)
 
-	api.SetInitRequestHandler(emptyHandler)
+	handlers := newTestHandlers()
+	api.SetInitRequestHandler(handlers.emptyHandler)
 	assert.NotNil(t, api.initRequestHandler)
 	response := api.initRequestHandler(nil)
 	AssertOk(t, response)
@@ -56,7 +57,8 @@ func TestSetEndRequestHandler(t *testing.T) {
 	api := NewAPI()
 	assert.Nil(t, api.endRequestHandler)
 
-	api.SetEndRequestHandler(emptyHandler)
+	handlers := newTestHandlers()
+	api.SetEndRequestHandler(handlers.emptyHandler)
 	assert.NotNil(t, api.endRequestHandler)
 	response := api.endRequestHandler(nil)
 	AssertOk(t, response)
@@ -79,9 +81,10 @@ func TestMap(t *testing.T) {
 	api := NewAPI()
 	assert.Empty(t, api.routes)
 
-	api.Map("get", "/a", emptyHandler)
-	api.Map("get,post,put", "/b", emptyHandler)
-	api.Map("post, put, delete", "/c", emptyHandler)
+	handlers := newTestHandlers()
+	api.Map("get", "/a", handlers.emptyHandler)
+	api.Map("get,post,put", "/b", handlers.emptyHandler)
+	api.Map("post, put, delete", "/c", handlers.emptyHandler)
 
 	assert.NotEmpty(t, api.routes)
 	assert.Equal(t, 7, len(api.routes), "There must be 7 routes for each HTTP method + path")
@@ -92,7 +95,8 @@ func TestMap(t *testing.T) {
 // Makes sure the engine isn't nil.
 func TestBuildEngine(t *testing.T) {
 	api := NewAPI()
-	api.Map("get", "/", emptyHandler)
+	handlers := newTestHandlers()
+	api.Map("get", "/", handlers.emptyHandler)
 	engine := api.buildEngine()
 	assert.NotNil(t, engine)
 }

@@ -48,6 +48,12 @@ func (ht *HTTPTest) Put(url string, requestJSON interface{}) *Response {
 	return ht.callAPI("PUT", url, requestJSON)
 }
 
+// Patch sends PATCH HTTP request to api endpoint and returns
+// wrapped response for further testing.
+func (ht *HTTPTest) Patch(url string, requestJSON interface{}) *Response {
+	return ht.callAPI("PATCH", url, requestJSON)
+}
+
 func (ht *HTTPTest) callAPI(method string, url string, requestJSON interface{}) *Response {
 	request := ht.createRequest(method, url, requestJSON)
 	response := ht.getResponse(request)

@@ -5,6 +5,7 @@
 package jo
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -119,5 +120,35 @@ func TestResponsePatching(t *testing.T) {
 		assert.NotNil(t, responseData["date"])
 		assert.NotNil(t, responseData["response"])
 		assert.NotEmpty(t, responseData["date"].(string))
+	}
+}
+
+// Creates API with mappings for every supported HTTP method.
+func TestEachHTTPMethod(t *testing.T) {
+	api, handlers, http := newAPITest()
+	api.SetEndRequestHandler(handlers.patchResponse)
+	endpoint := "/a/b/c/d/e"
+	httpMethods := "get,post,put,patch,delete"
+	api.Map(httpMethods, endpoint, handlers.emptyHandler)
+
+	httpMethodsSplit := strings.Split(httpMethods, ",")
+	requestBody := make(map[string]string)
+	requestBody["data"] = "dnepr"
+	for _, httpMethod := range httpMethodsSplit {
+		var response *Response
+		switch httpMethod {
+		case "get":
+			response = http.Get(endpoint)
+		case "post":
+			response = http.Post(endpoint, requestBody)
+		case "put":
+			response = http.Put(endpoint, requestBody)
+		case "patch":
+			response = http.Patch(endpoint, requestBody)
+		case "delete":
+			response = http.Delete(endpoint)
+		}
+
+		AssertOk(t, response)
 	}
 }

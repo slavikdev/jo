@@ -4,6 +4,8 @@
 
 package jo
 
+import "time"
+
 // testHandlers is a collection of route handlers used in tests.
 type testHandlers struct {
 }
@@ -15,7 +17,7 @@ func newTestHandlers() *testHandlers {
 
 // Returns Ok response. Used when handler logic is irrelevant.
 func (handlers *testHandlers) emptyHandler(context *RequestContext) *Response {
-	return Ok(nil)
+	return Ok(true)
 }
 
 // Returns Ok response with a message. Used when handler logic is irrelevant.
@@ -60,4 +62,14 @@ func (handlers *testHandlers) validateRequestHandler(context *RequestContext) *R
 	}
 
 	return BadRequest()
+}
+
+// Patches previous response data.
+func (handlers *testHandlers) patchResponse(context *RequestContext) *Response {
+	response := context.PrevHandlerResponse
+	wrapper := make(map[string]interface{})
+	wrapper["date"] = time.Now().String()
+	wrapper["response"] = response.Data
+	response.Data = wrapper
+	return response
 }

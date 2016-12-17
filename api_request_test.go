@@ -100,3 +100,24 @@ func TestRequestValidation(t *testing.T) {
 		AssertOk(t, response)
 	}
 }
+
+// Creates API with end request handler that patches response data.
+func TestResponsePatching(t *testing.T) {
+	api, handlers, http := newAPITest()
+	api.SetEndRequestHandler(handlers.patchResponse)
+	endpoints := []string{"/path1", "/path2"}
+	api.Map("get", endpoints[0], handlers.emptyHandler)
+	api.Map("get", endpoints[1], handlers.emptyMessageHandler)
+
+	for _, endpoint := range endpoints {
+		// Passing no data should return bad request error.
+		response := http.Get(endpoint)
+		AssertOk(t, response)
+
+		responseData := response.Data.(map[string]interface{})
+		assert.NotNil(t, responseData)
+		assert.NotNil(t, responseData["date"])
+		assert.NotNil(t, responseData["response"])
+		assert.NotEmpty(t, responseData["date"].(string))
+	}
+}

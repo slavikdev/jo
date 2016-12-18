@@ -12,6 +12,10 @@ If you need more flexibility–go get [gin](https://github.com/gin-gonic/gin).
 [![Go Report Card](https://goreportcard.com/badge/github.com/slavikdev/jo)](https://goreportcard.com/report/github.com/slavikdev/jo)
 [![GoDoc](https://godoc.org/github.com/slavikdev/jo?status.svg)](https://godoc.org/github.com/slavikdev/jo)
 
+```go
+import gopkg.in/slavikdev/jo.v1
+```
+
 ## Example
 
 ```go
@@ -19,8 +23,7 @@ package main
 
 import (
 	"time"
-
-	"github.com/slavikdev/jo"
+	"gopkg.in/slavikdev/jo.v1"
 )
 
 func main() {

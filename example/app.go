@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/slavikdev/jo"
+	"gopkg.in/slavikdev/jo.v1"
 )
 
 func main() {

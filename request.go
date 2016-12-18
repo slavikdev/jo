@@ -6,8 +6,8 @@ package jo
 
 import "gopkg.in/gin-gonic/gin.v1"
 
-// RequestContext contains request specific data.
-type RequestContext struct {
+// Request contains request specific data.
+type Request struct {
 	// Context is a gin-specific request context.
 	// TODO it's better to hide it and expose via public functions or properties.
 	Context *gin.Context
@@ -22,4 +22,14 @@ type RequestContext struct {
 
 	// Logger is a user defined logging interface.
 	Logger ILogger
+}
+
+// GetQuery returns request query string value by specified argument name.
+func (request *Request) GetQuery(name string) string {
+	return request.Context.Query(name)
+}
+
+// GetJSON deserializes JSON request into specified object.
+func (request *Request) GetJSON(output interface{}) {
+	request.Context.BindJSON(output)
 }

@@ -112,44 +112,44 @@ func (api *API) mapRoute(route *Route, engine *gin.Engine) {
 // createHandlerWrapper creates gin-specific handler wrapper.
 func (api *API) createHandlerWrapper(handlers []RouteHandler) gin.HandlerFunc {
 	return func(innerContext *gin.Context) {
-		response, context := api.initRequest(innerContext)
+		request, response := api.initRequest(innerContext)
 		if response.EndRequest {
-			api.endRequest(innerContext, context, response)
+			api.endRequest(innerContext, request, response)
 			return
 		}
 
 		for _, handler := range handlers {
-			response = handler(context)
+			response = handler(request)
 			if response.EndRequest {
-				api.endRequest(innerContext, context, response)
+				api.endRequest(innerContext, request, response)
 				return
 			}
-			context.PrevHandlerResponse = response
+			request.PrevHandlerResponse = response
 		}
 	}
 }
 
 // initRequest is called at the beginning of every handled request.
 // initRequestHandler is called if specified.
-func (api *API) initRequest(innerContext *gin.Context) (*Response, *RequestContext) {
+func (api *API) initRequest(innerContext *gin.Context) (*Request, *Response) {
 	response := Next(nil)
-	context := api.createRequestContext(innerContext, response)
+	request := api.createRequestContext(innerContext, response)
 	if api.initRequestHandler != nil {
-		response = api.initRequestHandler(context)
-		context.PrevHandlerResponse = response
+		response = api.initRequestHandler(request)
+		request.PrevHandlerResponse = response
 	}
-	return response, context
+	return request, response
 }
 
 // endRequest is called at the end of every handled request.
 // endRequestHandler is called if specified.
 func (api *API) endRequest(
 	innerContext *gin.Context,
-	context *RequestContext,
+	request *Request,
 	response *Response) {
 	if api.endRequestHandler != nil {
-		context.PrevHandlerResponse = response
-		response = api.endRequestHandler(context)
+		request.PrevHandlerResponse = response
+		response = api.endRequestHandler(request)
 	}
 	// Every request eventually returns JSON no matter of its status.
 	// NOTE the object itself is not returned because we should hide error field
@@ -166,8 +166,8 @@ func (api *API) endRequest(
 
 // createRequestContext creates context passed to request handlers.
 func (api *API) createRequestContext(
-	innerContext *gin.Context, prevResponse *Response) *RequestContext {
-	context := &RequestContext{}
+	innerContext *gin.Context, prevResponse *Response) *Request {
+	context := &Request{}
 	context.Context = innerContext
 	context.GlobalContext = api.globalContext
 	context.PrevHandlerResponse = prevResponse

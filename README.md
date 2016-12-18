@@ -63,21 +63,36 @@ func auth(rc *jo.RequestContext) *jo.Response {
 
 The example works as follows:
 ```
-Request:
 GET localhost:9999/time
+```
+```
+{
+    "data": "2016-12-18T02:51:43.07980668+02:00",
+    "successful": true
+}
+```
 
-Response:
-{"data":"2016-12-18T02:51:43.07980668+02:00","successful":true}
----
-Request:
+```
 GET localhost:9999/secret
+```
+```
+{
+    "data": null,
+    "error": {
+        "code": 403,
+        "message": "Forbidden",
+        "data": null
+    },
+    "successful": false
+}
+```
 
-Response:
-{"data":null,"error":{"code":403,"message":"Forbidden","data":null},"successful":false}
----
-Request:
+```
 GET localhost:9999/secret?apiToken=0123456789
-
-Response:
-{"data":"secret","successful":true}
+```
+```
+{
+    "data": "secret",
+    "successful": true
+}
 ```

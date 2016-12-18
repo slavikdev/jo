@@ -66,6 +66,11 @@ The example works as follows:
 GET localhost:9999/time
 ```
 ```
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Sun, 18 Dec 2016 00:51:43 GMT
+Content-Length: 64
+
 {
     "data": "2016-12-18T02:51:43.07980668+02:00",
     "successful": true
@@ -76,6 +81,11 @@ GET localhost:9999/time
 GET localhost:9999/secret
 ```
 ```
+HTTP/1.1 403 Forbidden
+Content-Type: application/json; charset=utf-8
+Date: Sun, 18 Dec 2016 00:51:10 GMT
+Content-Length: 88
+
 {
     "data": null,
     "error": {
@@ -91,6 +101,11 @@ GET localhost:9999/secret
 GET localhost:9999/secret?apiToken=0123456789
 ```
 ```
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Sun, 18 Dec 2016 00:40:37 GMT
+Content-Length: 36
+
 {
     "data": "secret",
     "successful": true

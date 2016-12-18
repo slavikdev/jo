@@ -152,7 +152,15 @@ func (api *API) endRequest(
 		response = api.endRequestHandler(context)
 	}
 	// Every request eventually returns JSON no matter of its status.
-	innerContext.JSON(response.HTTPCode, response)
+	// NOTE the object itself is not returned because we should hide error field
+	// on successful responses.
+	jsonResponse := make(map[string]interface{})
+	jsonResponse["successful"] = response.Successful
+	jsonResponse["data"] = response.Data
+	if !response.Successful {
+		jsonResponse["error"] = response.Error
+	}
+	innerContext.JSON(response.HTTPCode, jsonResponse)
 	innerContext.Abort()
 }
 

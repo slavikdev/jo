@@ -11,3 +11,73 @@ If you need more flexibility–go get [gin](https://github.com/gin-gonic/gin).
 [![codecov](https://codecov.io/gh/slavikdev/jo/branch/master/graph/badge.svg)](https://codecov.io/gh/slavikdev/jo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/slavikdev/jo)](https://goreportcard.com/report/github.com/slavikdev/jo)
 [![GoDoc](https://godoc.org/github.com/slavikdev/jo?status.svg)](https://godoc.org/github.com/slavikdev/jo)
+
+## Example
+
+```go
+package main
+
+import (
+	"time"
+
+	"github.com/slavikdev/jo"
+)
+
+func main() {
+	// Create api.
+	api := jo.NewAPI()
+
+	// Map routes.
+	api.Map("get", "/time", getTime)
+	api.Map("get", "/secret", auth, getSecret)
+
+	// Start api on port 9999.
+	err := api.Run(":9999")
+	if err != nil {
+		panic(err)
+	}
+}
+
+// Returns successful response with current time in data field.
+func getTime(rc *jo.RequestContext) *jo.Response {
+	currentTime := time.Now()
+	return jo.Ok(currentTime)
+}
+
+// Returns successful response with a word "secret" in data field.
+func getSecret(rc *jo.RequestContext) *jo.Response {
+	return jo.Ok("secret")
+}
+
+const apiToken string = "0123456789"
+
+// Checks if query string has apiToken argument with specific value.
+// If it does--passes request to next handler. Otherwise returns 403 Forbidden error.
+func auth(rc *jo.RequestContext) *jo.Response {
+	if rc.Context.Query("apiToken") == apiToken {
+		return jo.Next(nil)
+	}
+	return jo.Forbidden()
+}
+```
+
+The example works as follows:
+```
+Request:
+GET localhost:9999/time
+
+Response:
+{"data":"2016-12-18T02:51:43.07980668+02:00","successful":true}
+---
+Request:
+GET localhost:9999/secret
+
+Response:
+{"data":null,"error":{"code":403,"message":"Forbidden","data":null},"successful":false}
+---
+Request:
+GET localhost:9999/secret?apiToken=0123456789
+
+Response:
+{"data":"secret","successful":true}
+```

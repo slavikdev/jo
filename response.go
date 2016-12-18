@@ -6,15 +6,19 @@ package jo
 
 // Response describes common service response format.
 // Every HTTP response is wrapped in this structure.
+// NOTE this structure isn't directly serialized to JSON anywhere except tests.
+// Instead we take required fields because error field, for example,
+// isn't always needed in response and it wounldn't be nice to bloat responses
+// with redundant data.
 type Response struct {
 	Successful bool          `json:"successful"`
 	Error      ResponseError `json:"error"`
 	Data       interface{}   `json:"data"`
 
-	HTTPCode int
+	HTTPCode int `json:"-"`
 
 	// EndRequest specifies whether this response should be considered as final.
-	EndRequest bool
+	EndRequest bool `json:"-"`
 }
 
 // ResponseError describes error information returned in response.

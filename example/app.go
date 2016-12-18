@@ -22,13 +22,13 @@ func main() {
 }
 
 // Returns successful response with current time in data field.
-func getTime(rc *jo.RequestContext) *jo.Response {
+func getTime(request *jo.Request) *jo.Response {
 	currentTime := time.Now()
 	return jo.Ok(currentTime)
 }
 
 // Returns successful response with a word "secret" in data field.
-func getSecret(rc *jo.RequestContext) *jo.Response {
+func getSecret(request *jo.Request) *jo.Response {
 	return jo.Ok("secret")
 }
 
@@ -36,8 +36,8 @@ const apiToken string = "0123456789"
 
 // Checks if query string has apiToken argument with specific value.
 // If it does--passes request to next handler. Otherwise returns 403 Forbidden error.
-func auth(rc *jo.RequestContext) *jo.Response {
-	if rc.Context.Query("apiToken") == apiToken {
+func auth(request *jo.Request) *jo.Response {
+	if request.GetQuery("apiToken") == apiToken {
 		return jo.Next(nil)
 	}
 	return jo.Forbidden()

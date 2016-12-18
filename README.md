@@ -13,7 +13,7 @@ If you need more flexibility–go get [gin](https://github.com/gin-gonic/gin).
 [![GoDoc](https://godoc.org/github.com/slavikdev/jo?status.svg)](https://godoc.org/github.com/slavikdev/jo)
 
 ```go
-import gopkg.in/slavikdev/jo.v1
+import "gopkg.in/slavikdev/jo.v1"
 ```
 
 ## Example

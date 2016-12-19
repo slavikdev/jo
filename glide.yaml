@@ -2,3 +2,4 @@ package: github.com/slavikdev/jo
 import:
 - package: gopkg.in/gin-gonic/gin.v1
 - package: github.com/stretchr/testify
+- package: gopkg.in/tylerb/graceful.v1

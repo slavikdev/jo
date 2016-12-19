@@ -5,9 +5,15 @@
 package jo
 
 import (
+	"log"
+	"net"
+	"net/http"
+	"os"
 	"strings"
+	"time"
 
 	"gopkg.in/gin-gonic/gin.v1"
+	"gopkg.in/tylerb/graceful.v1"
 )
 
 // API provides functionality to map handler functions on specific HTTP routes.
@@ -17,11 +23,16 @@ type API struct {
 	logger             ILogger
 	initRequestHandler RouteHandler
 	endRequestHandler  RouteHandler
+	gracefulTimeout    time.Duration
 }
+
+// Defaults.
+const defGracefulTimeout time.Duration = 60
 
 // NewAPI creates new instance of API structure.
 func NewAPI() *API {
 	api := &API{}
+	api.SetGracefulTimeout(defGracefulTimeout)
 	return api
 }
 
@@ -51,6 +62,12 @@ func (api *API) SetLogger(logger ILogger) {
 	api.logger = logger
 }
 
+// SetGracefulTimeout sets timeout in seconds to wait
+// for connections to finish before app restart. Default value is 1 min.
+func (api *API) SetGracefulTimeout(timeoutSeconds time.Duration) {
+	api.gracefulTimeout = timeoutSeconds * time.Second
+}
+
 // Map assigns a chain of handlers to a specific URL path
 // available via specific HTTP methods.
 // List of HTTP methods should be specified as a string e.g. "get,post,put" or just "get".
@@ -72,20 +89,34 @@ func (api *API) Map(httpMethods string, path string, handlers ...RouteHandler) {
 // Run starts API on specified TCP address.
 func (api *API) Run(addr string) error {
 	engine := api.buildEngine()
-	return engine.Run(addr)
+	httpServer := &http.Server{Handler: engine, Addr: addr}
+	return graceful.ListenAndServe(httpServer, api.gracefulTimeout)
 }
 
 // RunTLS starts API on specified TCP address, serving requests via TLS.
 // Certificate and key file paths must be specified.
 func (api *API) RunTLS(addr string, certFile string, keyFile string) error {
 	engine := api.buildEngine()
-	return engine.RunTLS(addr, certFile, keyFile)
+	httpServer := &http.Server{Handler: engine, Addr: addr}
+	return graceful.ListenAndServeTLS(httpServer, certFile, keyFile, api.gracefulTimeout)
 }
 
 // RunUnix starts API on unix socket.
 func (api *API) RunUnix(file string) error {
 	engine := api.buildEngine()
-	return engine.RunUnix(file)
+	httpServer := &http.Server{Handler: engine}
+	listener := api.createUnixSocketListener(file)
+	defer listener.Close()
+	return graceful.Serve(httpServer, listener, api.gracefulTimeout)
+}
+
+func (api *API) createUnixSocketListener(file string) net.Listener {
+	os.Remove(file)
+	listener, err := net.Listen("unix", file)
+	if err != nil {
+		log.Fatalf("Couldn't create unix socket listener on %s: %s", file, err.Error())
+	}
+	return listener
 }
 
 // buildEngine creates instance of a gin engine and adds routes to it.

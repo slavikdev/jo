@@ -5,7 +5,6 @@
 package jo
 
 import (
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -105,18 +104,17 @@ func (api *API) RunTLS(addr string, certFile string, keyFile string) error {
 func (api *API) RunUnix(file string) error {
 	engine := api.buildEngine()
 	httpServer := &http.Server{Handler: engine}
-	listener := api.createUnixSocketListener(file)
+	listener, err := api.createUnixSocketListener(file)
+	if err != nil {
+		return err
+	}
 	defer listener.Close()
 	return graceful.Serve(httpServer, listener, api.gracefulTimeout)
 }
 
-func (api *API) createUnixSocketListener(file string) net.Listener {
+func (api *API) createUnixSocketListener(file string) (net.Listener, error) {
 	os.Remove(file)
-	listener, err := net.Listen("unix", file)
-	if err != nil {
-		log.Fatalf("Couldn't create unix socket listener on %s: %s", file, err.Error())
-	}
-	return listener
+	return net.Listen("unix", file)
 }
 
 // buildEngine creates instance of a gin engine and adds routes to it.

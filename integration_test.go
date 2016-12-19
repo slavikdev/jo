@@ -36,10 +36,18 @@ func TestRunUnix(t *testing.T) {
 		assert.NoError(t, api.RunUnix(socket))
 	}()
 	waitServer()
+}
 
-	// unixTest := NewHTTPUnixTest(socket)
-	// response := unixTest.Get("/")
-	// AssertOk(t, response)
+// Runs API on bad unix socket.
+func TestRunUnixBadSocket(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		fmt.Println("Skipping this test because unix sockets don't work on Windows.")
+		return
+	}
+
+	api := newAPITestIntegration()
+	socket := "###/tmp/jo_test_socket.sock"
+	assert.Error(t, api.RunUnix(socket))
 }
 
 // Runs API on TCP port via TLS.

@@ -11,6 +11,7 @@ If you need more flexibility–go get [gin](https://github.com/gin-gonic/gin).
 [![codecov](https://codecov.io/gh/slavikdev/jo/branch/master/graph/badge.svg)](https://codecov.io/gh/slavikdev/jo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/slavikdev/jo)](https://goreportcard.com/report/github.com/slavikdev/jo)
 [![GoDoc](https://godoc.org/github.com/slavikdev/jo?status.svg)](https://godoc.org/github.com/slavikdev/jo)
+[![Analytics](https://ga-beacon.appspot.com/UA-89293155-1/jo/readme)](https://github.com/igrigorik/ga-beacon)
 
 ```go
 import "gopkg.in/slavikdev/jo.v1"

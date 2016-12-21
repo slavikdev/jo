@@ -65,6 +65,22 @@ func BadRequest() *Response {
 	return response
 }
 
+// Unauthorized creates 401 Unauthorized HTTP response.
+func Unauthorized() *Response {
+	errorCode := 401
+	errorData := ResponseError{Code: errorCode, Message: "Unauthorized"}
+	response := Fail(errorCode, nil, errorData)
+	return response
+}
+
+// Error creates 500 internal error HTTP response.
+func Error(err error) *Response {
+	errorCode := 500
+	errorData := ResponseError{Code: errorCode, Message: err.Error()}
+	response := Fail(errorCode, nil, errorData)
+	return response
+}
+
 // Next creates response for the next handler in chain.
 func Next(data interface{}) *Response {
 	response := &Response{}

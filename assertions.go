@@ -25,17 +25,38 @@ func AssertFail(t *testing.T, response *Response) {
 }
 
 // AssertForbidden checks expected properties of Forbidden response.
-func AssertForbidden(t *testing.T, response *Response) {
-	AssertFail(t, response)
-	assert.Equal(t, 403, response.HTTPCode)
-	assert.Equal(t, 403, response.Error.Code)
-	assert.Equal(t, "Forbidden", response.Error.Message)
+func AssertForbidden(t *testing.T, response *Response, messages ...string) {
+	AssertHTTPError(403, "Forbidden", t, response, messages...)
 }
 
 // AssertBadRequest checks expected properties of BadRequest response.
-func AssertBadRequest(t *testing.T, response *Response) {
+func AssertBadRequest(t *testing.T, response *Response, messages ...string) {
+	AssertHTTPError(400, "Bad Request", t, response, messages...)
+}
+
+// AssertUnauthorized checks expected properties of Unauthorized response.
+func AssertUnauthorized(t *testing.T, response *Response, messages ...string) {
+	AssertHTTPError(401, "Unauthorized", t, response, messages...)
+}
+
+// AssertHTTPError checks expected properties of HTTP error response.
+func AssertHTTPError(
+	code int,
+	defMessage string,
+	t *testing.T,
+	response *Response,
+	messages ...string) {
+	message := getHTTPErrorMessage(defMessage, messages...)
 	AssertFail(t, response)
-	assert.Equal(t, 400, response.HTTPCode)
-	assert.Equal(t, 400, response.Error.Code)
-	assert.Equal(t, "Bad Request", response.Error.Message)
+	assert.Equal(t, code, response.HTTPCode)
+	assert.Equal(t, code, response.Error.Code)
+	assert.Equal(t, message, response.Error.Message)
+}
+
+func getHTTPErrorMessage(def string, messages ...string) string {
+	message := def
+	if len(messages) > 0 {
+		message = messages[0]
+	}
+	return message
 }

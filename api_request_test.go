@@ -66,7 +66,7 @@ func TestAuthentication(t *testing.T) {
 
 	// First we send request without token to get error.
 	response := http.Get("/secured")
-	AssertForbidden(t, response)
+	AssertUnauthorized(t, response)
 
 	// Now let's pass token to get through.
 	response = http.Get("/secured?token=secret")
@@ -82,24 +82,51 @@ func TestRequestValidation(t *testing.T) {
 	api.Map("post", endpoints[1], handlers.emptyMessageHandler)
 
 	for _, endpoint := range endpoints {
-		// Passing no data should return bad request error.
-		response := http.Post(endpoint, nil)
-		AssertBadRequest(t, response)
-
-		// Passing token but no session_id would still return bad request error.
-		response = http.Post(endpoint+"?token=123", nil)
-		AssertBadRequest(t, response)
-
-		// Passing session_id but no token would still return bad request error.
-		requestJSON := make(map[string]string)
-		requestJSON["session_id"] = "qwerty"
-		response = http.Post(endpoint, requestJSON)
-		AssertBadRequest(t, response)
-
-		// When token and session_id are present we should get through.
-		response = http.Post(endpoint+"?token=123", requestJSON)
-		AssertOk(t, response)
+		testSecuredEndpoint(t, http, endpoint)
 	}
+}
+
+// Creates API with a route protected by two validation handlers.
+// This test ensures chained handlers work properly.
+func TestChainedRequestValidation(t *testing.T) {
+	api, handlers, http := newAPITest()
+	endpoint := "/protected/area"
+	api.Map(
+		"post",
+		endpoint,
+		handlers.validateToken,
+		handlers.validateSessionID,
+		handlers.emptyMessageHandler)
+	testSecuredEndpoint(t, http, endpoint)
+}
+
+func testSecuredEndpoint(t *testing.T, http *HTTPTest, endpoint string) {
+	// Passing no data should return Forbidden error.
+	response := http.Post(endpoint, nil)
+	AssertForbidden(t, response, "Token required")
+
+	// Passing invalid token results in bad request.
+	response = http.Post(endpoint+"?token=123", nil)
+	AssertBadRequest(t, response, "Invalid token")
+
+	// Passing valid token results in bad request because there's no JSON body.
+	response = http.Post(endpoint+"?token=S123", nil)
+	AssertBadRequest(t, response, "No body")
+
+	// Passing valid token and some JSON body results in forbidden.
+	response = http.Post(endpoint+"?token=S123", make(map[string]string))
+	AssertForbidden(t, response, "Session required")
+
+	// Passing invalid session id returns bad request.
+	requestJSON := make(map[string]string)
+	requestJSON["session_id"] = "qwerty"
+	response = http.Post(endpoint+"?token=S123", requestJSON)
+	AssertBadRequest(t, response, "Invalid session")
+
+	// Both token and session id are valid, should be OK.
+	requestJSON["session_id"] = "ID12345"
+	response = http.Post(endpoint+"?token=S123", requestJSON)
+	AssertOk(t, response)
 }
 
 // Creates API with end request handler that patches response data.

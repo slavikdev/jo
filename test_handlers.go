@@ -4,7 +4,10 @@
 
 package jo
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // testHandlers is a collection of route handlers used in tests.
 type testHandlers struct {
@@ -37,31 +40,62 @@ func (handlers *testHandlers) loggingHanler(request *Request) *Response {
 	request.Logger.Info("Hello %s", "World")
 	request.Logger.Warn("Hello %s", "World")
 	request.Logger.Error("Hello %s", "World")
-	return Ok(nil)
+	return Ok(true)
 }
 
 // Checks whether request has special query string argument "token" with value secret.
 // If it does--request goes to the next handler. Otherwise 403 Forbidden is returned.
 func (handlers *testHandlers) authHandler(request *Request) *Response {
 	if request.GetQuery("token") == "secret" {
-		return Next(nil)
+		return Next()
 	}
-	return Forbidden()
+	return Unauthorized()
 }
 
 // Validates request to be of specific structure. Used as init request handler.
 func (handlers *testHandlers) validateRequestHandler(request *Request) *Response {
 	// Every request must have token
-	if len(request.GetQuery("token")) > 0 {
-		// and there must be session id in body
-		json := make(map[string]interface{})
-		request.GetJSON(&json)
-		if json["session_id"] != nil && len(json["session_id"].(string)) > 0 {
-			return Next(nil)
-		}
+	response := handlers.validateToken(request)
+	if response.EndRequest {
+		return response
+	}
+	return handlers.validateSessionID(request)
+}
+
+// Validates presence of a token.
+func (handlers *testHandlers) validateToken(request *Request) *Response {
+	token := request.GetQuery("token")
+	if len(token) == 0 {
+		return ForbiddenMessage("Token required")
 	}
 
-	return BadRequest()
+	// Token must begin with letter S.
+	if strings.Index(token, "S") == 0 {
+		return Next()
+	}
+
+	return BadRequestMessage("Invalid token")
+}
+
+// Validates presence of session_id
+func (handlers *testHandlers) validateSessionID(request *Request) *Response {
+	json := make(map[string]interface{})
+	request.GetJSON(&json)
+	if json == nil {
+		return BadRequestMessage("No body")
+	}
+
+	if json["session_id"] == nil || len(json["session_id"].(string)) == 0 {
+		return ForbiddenMessage("Session required")
+	}
+
+	sessionID := json["session_id"].(string)
+	// Session ID must begin with ID.
+	if strings.Index(sessionID, "ID") == 0 {
+		return Next(sessionID)
+	}
+
+	return BadRequestMessage("Invalid session")
 }
 
 // Patches previous response data.

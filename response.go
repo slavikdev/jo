@@ -51,41 +51,56 @@ func Fail(code int, data interface{}, errorData ResponseError) *Response {
 
 // Forbidden creates 403 Forbidden HTTP response.
 func Forbidden() *Response {
-	errorCode := 403
-	errorData := ResponseError{Code: errorCode, Message: "Forbidden"}
-	response := Fail(errorCode, nil, errorData)
-	return response
+	return ForbiddenMessage("Forbidden")
+}
+
+// ForbiddenMessage creates 403 Forbidden HTTP response with specified message.
+func ForbiddenMessage(message string) *Response {
+	return createHTTPErrorResponse(403, message)
 }
 
 // BadRequest creates 400 Bad Request HTTP response.
 func BadRequest() *Response {
-	errorCode := 400
-	errorData := ResponseError{Code: errorCode, Message: "Bad Request"}
-	response := Fail(errorCode, nil, errorData)
-	return response
+	return BadRequestMessage("Bad Request")
+}
+
+// BadRequestMessage creates 400 Bad Request HTTP response with specified message.
+func BadRequestMessage(message string) *Response {
+	return createHTTPErrorResponse(400, message)
 }
 
 // Unauthorized creates 401 Unauthorized HTTP response.
 func Unauthorized() *Response {
-	errorCode := 401
-	errorData := ResponseError{Code: errorCode, Message: "Unauthorized"}
-	response := Fail(errorCode, nil, errorData)
-	return response
+	return UnauthorizedMessage("Unauthorized")
+}
+
+// UnauthorizedMessage creates 401 Unauthorized HTTP response with specified message.
+func UnauthorizedMessage(message string) *Response {
+	return createHTTPErrorResponse(401, message)
 }
 
 // Error creates 500 internal error HTTP response.
 func Error(err error) *Response {
-	errorCode := 500
-	errorData := ResponseError{Code: errorCode, Message: err.Error()}
-	response := Fail(errorCode, nil, errorData)
-	return response
+	return ErrorMessage(err.Error())
 }
 
-// Next creates response for the next handler in chain.
-func Next(data interface{}) *Response {
+// ErrorMessage creates 500 internal error HTTP response with specified message.
+func ErrorMessage(message string) *Response {
+	return createHTTPErrorResponse(500, message)
+}
+
+// Next creates response which indicates that next handler in chain should be called.
+func Next(data ...interface{}) *Response {
 	response := &Response{}
 	response.Data = data
 	response.Successful = true
 	response.EndRequest = false
+	return response
+}
+
+func createHTTPErrorResponse(code int, message string) *Response {
+	errorCode := code
+	errorData := ResponseError{Code: errorCode, Message: message}
+	response := Fail(errorCode, nil, errorData)
 	return response
 }

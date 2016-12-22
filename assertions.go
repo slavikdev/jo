@@ -39,6 +39,11 @@ func AssertUnauthorized(t *testing.T, response *Response, messages ...string) {
 	AssertHTTPError(401, "Unauthorized", t, response, messages...)
 }
 
+// AssertResponseError checks expected properties of Error response.
+func AssertResponseError(t *testing.T, response *Response, messages ...string) {
+	AssertHTTPError(500, "Internal Error", t, response, messages...)
+}
+
 // AssertHTTPError checks expected properties of HTTP error response.
 func AssertHTTPError(
 	code int,

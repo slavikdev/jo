@@ -12,10 +12,10 @@ import (
 )
 
 // Creates things we need in every test.
-func newAPITest() (*API, *testHandlers, *HTTPTest) {
+func newAPITest() (*API, *testHandlers, *HTTPFunctionalTest) {
 	api := NewAPI()
 	handlers := newTestHandlers()
-	ht := NewHTTPTest(api)
+	ht := NewHTTPFunctionalTest(api)
 	return api, handlers, ht
 }
 
@@ -100,7 +100,7 @@ func TestChainedRequestValidation(t *testing.T) {
 	testSecuredEndpoint(t, http, endpoint)
 }
 
-func testSecuredEndpoint(t *testing.T, http *HTTPTest, endpoint string) {
+func testSecuredEndpoint(t *testing.T, http *HTTPFunctionalTest, endpoint string) {
 	// Passing no data should return Forbidden error.
 	response := http.Post(endpoint, nil)
 	AssertForbidden(t, response, "Token required")

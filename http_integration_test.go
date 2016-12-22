@@ -104,7 +104,6 @@ func (ht *HTTPIntegrationTest) callAPI(
 		client.Transport = ht.transport
 	}
 	httpResponse, err := client.Do(request)
-	defer httpResponse.Body.Close()
 	if err != nil {
 		panic(err)
 	}
@@ -113,6 +112,7 @@ func (ht *HTTPIntegrationTest) callAPI(
 }
 
 func (ht *HTTPIntegrationTest) readResponse(httpResponse *http.Response) *Response {
+	defer httpResponse.Body.Close()
 	body, err := ioutil.ReadAll(httpResponse.Body)
 	if err != nil {
 		panic(err)

@@ -13,14 +13,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const inTestHost = "localhost:1234"
+const inTestHostTLS = "localhost:12345"
+const inTestSocket = "/tmp/jo_test_socket.sock"
+const inTestCRTFile = "test_files/certificate.crt"
+const inTestKeyFile = "test_files/privateKey.key"
+
 // Runs API on TCP port.
 // NOTE here we merely test our wrapper around gin's Run. Gin has its own tests.
 func TestRun(t *testing.T) {
-	api := newAPITestIntegration()
+	api := newInTestAPI()
+	host := inTestHost
 	go func() {
-		assert.NoError(t, api.Run(":9988"))
+		assert.NoError(t, api.Run(host))
 	}()
 	waitServer()
+
+	inTestDefaultRoute(t, host)
 }
 
 // Runs API on unix socket.
@@ -30,8 +39,8 @@ func TestRunUnix(t *testing.T) {
 		return
 	}
 
-	api := newAPITestIntegration()
-	socket := "/tmp/jo_test_socket.sock"
+	api := newInTestAPI()
+	socket := inTestSocket
 	go func() {
 		assert.NoError(t, api.RunUnix(socket))
 	}()
@@ -45,26 +54,41 @@ func TestRunUnixBadSocket(t *testing.T) {
 		return
 	}
 
-	api := newAPITestIntegration()
-	socket := "###/tmp/jo_test_socket.sock"
+	api := newInTestAPI()
+	socket := "###" + inTestSocket
 	assert.Error(t, api.RunUnix(socket))
 }
 
 // Runs API on TCP port via TLS.
 func TestRunTLS(t *testing.T) {
-	api := newAPITestIntegration()
+	api := newInTestAPI()
+	host := inTestHostTLS
 	go func() {
 		assert.NoError(t,
-			api.RunTLS(":12345", "test_files/certificate.crt", "test_files/privateKey.key"))
+			api.RunTLS(host, inTestCRTFile, inTestKeyFile))
 	}()
 	waitServer()
+
+	inTestDefaultRouteTLS(t, host)
 }
 
 func waitServer() {
 	time.Sleep(10 * time.Millisecond)
 }
 
-func newAPITestIntegration() *API {
+func inTestDefaultRoute(t *testing.T, host string) {
+	http := NewHTTPIntegrationTest(host)
+	response := http.Get("/")
+	AssertOk(t, response)
+}
+
+func inTestDefaultRouteTLS(t *testing.T, host string) {
+	https := NewHTTPIntegrationTestTLS(host, inTestCRTFile, inTestKeyFile)
+	response := https.Get("/")
+	AssertOk(t, response)
+}
+
+func newInTestAPI() *API {
 	api, handlers, _ := newAPITest()
 	api.Map("get", "/", handlers.emptyHandler)
 	return api

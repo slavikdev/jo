@@ -5,7 +5,6 @@
 package jo
 
 import (
-	"bytes"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -57,21 +56,9 @@ func (ht *HTTPFunctionalTest) Patch(url string, requestJSON interface{}) *Respon
 
 func (ht *HTTPFunctionalTest) callAPI(
 	method string, url string, requestJSON interface{}) *Response {
-	request := ht.createRequest(method, url, requestJSON)
+	request := createHTTPTestRequest(method, url, requestJSON)
 	response := ht.getResponse(request)
 	return response
-}
-
-func (ht *HTTPFunctionalTest) createRequest(
-	method string, url string, requestJSON interface{}) *http.Request {
-	jsonBytes := jsonToBytes(requestJSON)
-	byteReader := bytes.NewReader(jsonBytes)
-	request, err := http.NewRequest(method, url, byteReader)
-	if nil != err {
-		log.Fatalf("Couldn't create request: %s %s", method, url)
-	}
-	request.Header.Add("Content-Type", "application/json")
-	return request
 }
 
 func (ht *HTTPFunctionalTest) getResponse(request *http.Request) *Response {

@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const inTestHost = "localhost:1234"
-const inTestHostTLS = "localhost:12345"
+const inTestHost = "localhost:8989"
+const inTestHostTLS = "localhost:9898"
 const inTestSocket = "/tmp/jo_test_socket.sock"
 const inTestCRTFile = "test_files/certificate.crt"
 const inTestKeyFile = "test_files/privateKey.key"
@@ -34,8 +34,7 @@ func TestRun(t *testing.T) {
 
 // Runs API on unix socket.
 func TestRunUnix(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		fmt.Println("Skipping this test because unix sockets don't work on Windows.")
+	if onWindows() {
 		return
 	}
 
@@ -45,12 +44,12 @@ func TestRunUnix(t *testing.T) {
 		assert.NoError(t, api.RunUnix(socket))
 	}()
 	waitServer()
+	inTestDefaultRouteUnix(t, "localhost", socket)
 }
 
 // Runs API on bad unix socket.
 func TestRunUnixBadSocket(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		fmt.Println("Skipping this test because unix sockets don't work on Windows.")
+	if onWindows() {
 		return
 	}
 
@@ -76,6 +75,14 @@ func waitServer() {
 	time.Sleep(10 * time.Millisecond)
 }
 
+func onWindows() bool {
+	if runtime.GOOS == "windows" {
+		fmt.Println("Skipping this test because unix sockets don't work on Windows.")
+		return true
+	}
+	return false
+}
+
 func inTestDefaultRoute(t *testing.T, host string) {
 	http := NewHTTPIntegrationTest(host)
 	response := http.Get("/")
@@ -85,6 +92,12 @@ func inTestDefaultRoute(t *testing.T, host string) {
 func inTestDefaultRouteTLS(t *testing.T, host string) {
 	https := NewHTTPIntegrationTestTLS(host, inTestCRTFile, inTestKeyFile)
 	response := https.Get("/")
+	AssertOk(t, response)
+}
+
+func inTestDefaultRouteUnix(t *testing.T, host, socket string) {
+	http := NewHTTPIntegrationTestUnix(host, socket)
+	response := http.Get("/")
 	AssertOk(t, response)
 }
 

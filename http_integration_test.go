@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 )
 
@@ -18,6 +19,7 @@ import (
 type HTTPIntegrationTest struct {
 	proto     string
 	host      string
+	socket    string
 	transport *http.Transport
 }
 
@@ -31,7 +33,7 @@ func NewHTTPIntegrationTest(host string) *HTTPIntegrationTest {
 
 // NewHTTPIntegrationTestTLS creates new instance of HTTP testing framework with TLS
 // configuration, allowing to test over HTTPS.
-func NewHTTPIntegrationTestTLS(host, crt string, key string) *HTTPIntegrationTest {
+func NewHTTPIntegrationTestTLS(host, crt, key string) *HTTPIntegrationTest {
 	cert, err := tls.LoadX509KeyPair(crt, key)
 	if err != nil {
 		panic(err)
@@ -48,7 +50,18 @@ func NewHTTPIntegrationTestTLS(host, crt string, key string) *HTTPIntegrationTes
 		TLSClientConfig:    tlsConfig,
 		DisableCompression: true,
 	}
+	return httpTest
+}
 
+// NewHTTPIntegrationTestUnix creates new instance of HTTP testing framework to run
+// requests via unix socket.
+func NewHTTPIntegrationTestUnix(host, socket string) *HTTPIntegrationTest {
+	httpTest := NewHTTPIntegrationTest(host)
+	httpTest.proto = "http"
+	httpTest.socket = socket
+	httpTest.transport = &http.Transport{
+		Dial: httpTest.dialUnixSocket,
+	}
 	return httpTest
 }
 
@@ -111,4 +124,9 @@ func (ht *HTTPIntegrationTest) readResponse(httpResponse *http.Response) *Respon
 	}
 	response.HTTPCode = httpResponse.StatusCode
 	return response
+}
+
+func (ht *HTTPIntegrationTest) dialUnixSocket(
+	proto, addr string) (conn net.Conn, err error) {
+	return net.Dial("unix", ht.socket)
 }
